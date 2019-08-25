@@ -4,11 +4,17 @@ const { session, driver } = require('../../config/db/neo4j');
 
 //Rutas
 Router.post('/', (req, res) => {
+  console.log(req.body.ngo_id);
   session
-    .run('CREATE (o:NGO {name:$name, image:$imageUrl}) RETURN o;', {
-      name: req.body.name,
-      imageUrl: req.body.imageUrl
-    })
+    .run(
+      `MATCH (o:NGO) WHERE id(o)=${req.body.ngo_id} CREATE (o)-[r:ORGANIZES]->(e:Event {name:$name, capacity:$capacity, description:$description, image:$imageUrl}) RETURN e;`,
+      {
+        name: req.body.name,
+        capacity: req.body.capacity,
+        description: req.body.description,
+        imageUrl: req.body.imageUrl
+      }
+    )
     .then(result => {
       driver.close();
       res.json(result.records[0].get(0));
@@ -24,10 +30,11 @@ Router.post('/', (req, res) => {
 
 Router.get('/', (req, res) => {
   session
-    .run('MATCH (o:NGO) RETURN o LIMIT 30')
+    .run('MATCH (e:Event) RETURN e LIMIT 30')
     .then(result => {
       driver.close();
       payload = [];
+      console.log(result.records);
       result.records.forEach(r => {
         console.log(r);
         payload.push(r.get(0));
@@ -45,10 +52,9 @@ Router.get('/', (req, res) => {
 
 Router.get('/:id', (req, res) => {
   session
-    .run(`MATCH (o:NGO) WHERE id(o)=${req.params.id} RETURN o;`)
+    .run(`MATCH (e:Event),(o:NGO) WHERE id(e)=${req.params.id} RETURN e;`)
     .then(result => {
       driver.close();
-      console.log(result);
       res.json(result.records[0].get(0));
     })
     .catch(e => {

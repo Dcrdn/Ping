@@ -1,4 +1,5 @@
 const http = require('http');
+const { driver } = require('./config/db/neo4j');
 const app = require('./app');
 const PORT = 4000;
 

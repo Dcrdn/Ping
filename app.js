@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
 const cors = require('cors');
 
 //Global middleware
@@ -12,17 +11,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
 
-//DB
-mongoose.connect(process.env.DB_URI, { useNewUrlParser: true });
-mongoose.connection.once('open', () => {
-  console.log('<< connected to db');
-});
-
 //Routes
 const NGORoutes = require('./routes/NGO/index.js');
 const UserRoutes = require('./routes/User/index.js');
-app.use('/NGO/', NGORoutes);
+const EventRoutes = require('./routes/Event/index.js');
+
+app.use('/ngo/', NGORoutes);
 app.use('/user/', UserRoutes);
+app.use('/event/', EventRoutes);
 
 //Errors
 
